@@ -6,6 +6,12 @@ const models = require('../models');
 
 
 controller.showHomepage = async (req, res) => {
+    const recentProducts = await models.Product.findAll({
+        attributes: ['id', 'name', 'imagePath', 'stars', 'price', 'oldPrice', 'createdAt'],
+        order: [['createdAt', 'DESC']],
+        limit: 10
+    });
+    res.locals.recentProducts = recentProducts;
 
     const featuredProducts = await models.Product.findAll({
         attributes: ['id', 'name', 'imagePath', 'stars', 'price', 'oldPrice'],
@@ -14,9 +20,10 @@ controller.showHomepage = async (req, res) => {
     });
     res.locals.featuredProducts = featuredProducts;
 
+
     const categories = await models.Category.findAll();
     const secondArray = categories.splice(2, 2);
-    const thirdArray = categories.splice(1,1);
+    const thirdArray = categories.splice(1, 1);
     res.locals.categoryArray = {
         categories,
         secondArray,
