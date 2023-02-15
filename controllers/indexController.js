@@ -6,8 +6,15 @@ const models = require('../models');
 
 
 controller.showHomepage = async (req, res) => {
+
+    const featuredProducts = await models.Product.findAll({
+        attributes: ['id', 'name', 'imagePath', 'stars', 'price', 'oldPrice'],
+        order: [['stars', 'DESC']],
+        limit: 10
+    });
+    res.locals.featuredProducts = featuredProducts;
+
     const categories = await models.Category.findAll();
-    console.log(categories);
     const secondArray = categories.splice(2, 2);
     const thirdArray = categories.splice(1,1);
     res.locals.categoryArray = {
