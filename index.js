@@ -5,8 +5,8 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 4000;
 const expressHandlebars = require('express-handlebars');
-const helper = require('./controllers/handlebarsHelper');
 const {createStarList} = require('./controllers/handlebarsHelper');
+const {createPagination} = require('express-handlebars-paginate')
 
 app.use(express.static(__dirname + '/public'));
 
@@ -19,7 +19,8 @@ app.engine('hbs', expressHandlebars.engine({
         allowProtoPropertiesByDefault: true
     },
     helpers: {
-        createStarList
+        createStarList,
+        createPagination
     }
 }));
 app.set('view engine', 'hbs');
