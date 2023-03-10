@@ -67,6 +67,10 @@ controller.show = async (req, res) => {
     res.locals.sort = sort
     res.locals.originalUrl = removeParam('sort', req.originalUrl)
 
+    if(Object.keys(req.query).length == 0) {
+        res.locals.originalUrl = res.locals.originalUrl + '?'
+    }
+
     let products = await models.Product.findAll(options);
     res.locals.products = products;
     res.render('product-list');
