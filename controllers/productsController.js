@@ -74,7 +74,7 @@ controller.show = async (req, res) => {
     const limit = 6
     options.limit = limit
     options.offset = limit * (page - 1)
-    let {count, rows} = await models.Product.findAndCountAll(options)
+    let { count, rows } = await models.Product.findAndCountAll(options)
     res.locals.pagination = {
         page: page,
         limit: limit,
@@ -92,20 +92,47 @@ controller.showDetail = async (req, res) => {
     let product = await models.Product.findOne({
         attributes: ['id', 'name', 'stars', 'summary', 'description', 'specification', 'price', 'oldPrice'],
         where: { id },
-        include: [{
-            model: models.Image,
-            attributes: ['name', 'imagePath']
-        },
-        {
-            model: models.Review,
-            attributes: ['id', 'review', 'stars', 'createdAt'],
-            include: {
-                model: models.User,
-                attributes: ['firstName', 'lastName']
+        include: [
+            {
+                model: models.Image,
+                attributes: ['name', 'imagePath']
+            },
+            {
+                model: models.Review,
+                attributes: ['id', 'review', 'stars', 'createdAt'],
+                include: {
+                    model: models.User,
+                    attributes: ['firstName', 'lastName']
+                }
+            },
+            {
+                model: models.Tag,
+                attributes: ['id']
             }
-        }]
+        ]
     });
     res.locals.product = product;
+
+    let tagIds = [];
+    product.Tags.forEach(tag => {
+        tagIds.push(tag.id)
+    });
+
+    let relatedProducts = await models.Product.findAll({
+        attributes: ['id', 'name', 'price', 'imagePath', 'oldPrice'],
+        include: [
+            {
+                model: models.Tag,
+                attributes: ['id'],
+                where: {
+                    id: { [Op.in]: tagIds }
+                }
+            }
+        ],
+        limit: 10
+    })
+
+    res.locals.relatedProducts = relatedProducts
     res.render('product-detail');
 }
 
