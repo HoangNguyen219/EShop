@@ -51,6 +51,8 @@ app.use((req, res, next) => {
 
 app.use('/', require('./routes/indexRouter'));
 app.use('/products', require('./routes/productsRouter'));
+app.use('/users', require('./routes/usersRouter'));
+
 
 
 app.use((req, res, next) => {
