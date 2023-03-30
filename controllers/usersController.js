@@ -3,6 +3,7 @@
 const controller = {}
 const models = require('../models');
 
+
 controller.checkout = async (req, res) => {
     if (req.session.cart.quantity > 0) {
         let userId = 1;
@@ -17,45 +18,50 @@ controller.checkout = async (req, res) => {
 }
 
 controller.placeorders = async (req, res) => {
-    let userId = 1;
-    let addressId = isNaN(req.body.addressId) ? 0 : parseInt(req.body.addressId)
-    let address = await models.Address.findByPk(addressId);
-    if (!address) {
-        address = await models.Address.create({
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            email: req.body.email,
-            mobile: req.body.mobile,
-            address: req.body.address,
-            country: req.body.country,
-            city: req.body.city,
-            state: req.body.state,
-            zipCode: req.body.zipCode,
-            isDefault: req.body.isDefault,
-            userId
-        })
-    }
-    let cart = req.session.cart
-    cart.paymentMethod = req.body.payment
-    cart.shippingAddress = `${address.firstName} ${address.lastName}, Email: ${address.email}, 
+    if (req.session.cart.quantity > 0) {
+        let userId = 1;
+        let addressId = isNaN(req.body.addressId) ? 0 : parseInt(req.body.addressId)
+        let address = await models.Address.findByPk(addressId);
+        if (!address) {
+            address = await models.Address.create({
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                email: req.body.email,
+                mobile: req.body.mobile,
+                address: req.body.address,
+                country: req.body.country,
+                city: req.body.city,
+                state: req.body.state,
+                zipCode: req.body.zipCode,
+                isDefault: req.body.isDefault,
+                userId
+            })
+        }
+        let cart = req.session.cart
+        cart.paymentMethod = req.body.payment
+        cart.shippingAddress = `${address.firstName} ${address.lastName}, Email: ${address.email}, 
     Mobile: ${address.mobile}, Address: ${address.address}, ${address.city}, ${address.country}, 
     ${address.state}, ${address.zipCode}`;
 
-    switch (req.body.payment) {
-        case 'PAYPAL':
-            saveOrders(req, res, 'PAID');
-            break;
-        case 'COD':
-            saveOrders(req,res,'UNPAID')
-            break
-        default:
-            return res.redirect('/users/checkout')
+        switch (req.body.payment) {
+            case 'PAYPAL':
+                saveOrders(req, res, 'PAID');
+                break;
+            case 'COD':
+                saveOrders(req, res, 'UNPAID')
+                break
+            default:
+                return res.redirect('/users/checkout')
+        }
+    }
+    else {
+        return res.redirect('/products')
     }
 }
 
 async function saveOrders(req, res, status) {
     let userId = 1;
-    let {items, ...others} = req.session.cart.getCart()
+    let { items, ...others } = req.session.cart.getCart()
     let order = await models.Order.create({
         userId,
         ...others,
@@ -73,7 +79,7 @@ async function saveOrders(req, res, status) {
     });
     await models.OrderDetail.bulkCreate(orderDetails);
     req.session.cart.clear()
-    return res.render('error', {message: 'Thank you for your order!'})
+    return res.render('error', { message: 'Thank you for your order!' })
 
 }
 
