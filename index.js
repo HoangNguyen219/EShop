@@ -1,5 +1,6 @@
 "use strict";
 
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 4000;
@@ -10,7 +11,7 @@ const session = require("express-session");
 const redisStore = require("connect-redis").default;
 const { createClient } = require("redis");
 const redisClient = createClient({
-  url: "redis://red-ch58r2ak728glsl15n7g:6379",
+  url: process.env.REDIS_URL,
 });
 
 redisClient.connect().catch(console.error);
@@ -42,7 +43,7 @@ app.use(express.urlencoded({ extended: false })); // application/x-www-form-urle
 // Cau hinh session
 app.use(
   session({
-    secret: "secret",
+    secret: process.env.SESSION_SECRET,
     store: new redisStore({
       client: redisClient,
     }),
